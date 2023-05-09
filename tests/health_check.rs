@@ -1,7 +1,7 @@
-use sqlx::{PgConnection, Connection};
+use sqlx::{Connection, PgConnection};
 use std::net::TcpListener;
-use zero2prod::startup::run;
 use zero2prod::configuration::get_configuration;
+use zero2prod::startup::run;
 
 fn spawn_app() -> String {
     let listener = TcpListener::bind("127.0.0.1:0").expect("Failed to bind random port");
@@ -36,7 +36,8 @@ async fn subscribe_returns_a_200_for_valid_form_data() {
     // The `Connection` trait MUST be in scope for us to invoke
     // `PgConnection` - it is not an inherent method of the struct
     let mut connection = PgConnection::connect(&connection_string)
-    .await.expect("Failed to connect to Postgres.");
+        .await
+        .expect("Failed to connect to Postgres.");
 
     let client = reqwest::Client::new();
 
@@ -53,7 +54,8 @@ async fn subscribe_returns_a_200_for_valid_form_data() {
 
     let saved = sqlx::query!("SELECT email, name from subscriptions",)
         .fetch_one(&mut connection)
-        .await.expect("Failed to fetch saved subscription.");
+        .await
+        .expect("Failed to fetch saved subscription.");
 
     assert_eq!(saved.email, "ursula_le_guin@gmail.com");
     assert_eq!(saved.name, "le guin");
