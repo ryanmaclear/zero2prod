@@ -1,8 +1,8 @@
-use zero2prod::configuration::{DatabaseSettings, get_configuration};
-use zero2prod::startup::run;
-use std::net::TcpListener;
 use sqlx::{Connection, Executor, PgConnection, PgPool};
+use std::net::TcpListener;
 use uuid::Uuid;
+use zero2prod::configuration::{get_configuration, DatabaseSettings};
+use zero2prod::startup::run;
 
 pub struct TestApp {
     pub address: String,
@@ -19,8 +19,7 @@ async fn spawn_app() -> TestApp {
 
     let connection_pool = configure_database(&configuration.database).await;
 
-    let server = run(listener, connection_pool.clone())
-        .expect("Failed to bind address");
+    let server = run(listener, connection_pool.clone()).expect("Failed to bind address");
 
     let _ = tokio::spawn(server);
 
@@ -31,9 +30,7 @@ async fn spawn_app() -> TestApp {
 }
 
 pub async fn configure_database(config: &DatabaseSettings) -> PgPool {
-    let mut connection = PgConnection::connect(
-        &config.connection_string_without_db()
-        )
+    let mut connection = PgConnection::connect(&config.connection_string_without_db())
         .await
         .expect("Failed to connection to postgres.");
 
@@ -43,7 +40,8 @@ pub async fn configure_database(config: &DatabaseSettings) -> PgPool {
         .expect("Failed to create database");
 
     let connection_pool = PgPool::connect(&config.connection_string())
-        .await.expect("Failed to connect to Postgres.");
+        .await
+        .expect("Failed to connect to Postgres.");
 
     sqlx::migrate!("./migrations")
         .run(&connection_pool)
